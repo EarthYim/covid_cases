@@ -3,12 +3,14 @@ package main
 import (
 	"covid_cases/app"
 	"covid_cases/app/covid"
+	"covid_cases/config"
 )
 
 func main() {
+	config := config.GetConfig()
 	r := app.NewRouter()
 
-	apiAdapter := covid.NewApiAdapter("https://static.wongnai.com/devinterview/covid-cases.json")
+	apiAdapter := covid.NewApiAdapter(config.CovidApiEndpoint)
 	service := covid.New(apiAdapter)
 
 	r.GET("/covid", app.NewHandler(service.HandleRequest))

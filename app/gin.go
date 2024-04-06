@@ -40,9 +40,9 @@ func NewRouter() *gin.Engine {
 	r := gin.Default()
 
 	config := cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders:     []string{"X-Requested-With", "Authorization", "Origin", "Content-Length", "Content-Type", "TransactionID"},
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET"},
+		// AllowHeaders:     []string{"X-Requested-With", "Authorization", "Origin", "Content-Length", "Content-Type", "TransactionID"},
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
 	}
