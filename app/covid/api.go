@@ -2,6 +2,7 @@ package covid
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 )
@@ -51,14 +52,15 @@ func (a *Adapter) GetData() ([]CovidApiData, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK || resp.Body == nil {
+		return nil, errors.New("failed to get data")
+	}
+
 	var respData CovidApiResp
 	if err := json.NewDecoder(resp.Body).Decode(&respData); err != nil {
 		return nil, err
 	}
 
 	data := respData.Data
-
-	// fmt.Printf("data: %v", data[0]) //DEBUG
-
 	return data, nil
 }

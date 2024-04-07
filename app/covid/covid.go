@@ -30,12 +30,23 @@ func New(a apiAdapter) *service {
 	}
 }
 
-func (s *service) CountAgeGroup() (*CovidResponse, error) {
+func (s *service) HandleRequest(ctx app.Context) {
 	data, err := s.GetData()
 	if err != nil {
-		return nil, err
+		ctx.InternalServerError(err)
+		return
 	}
 
+	ageGroup := s.CountAgeGroup(data)
+	if err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+
+	ctx.OK(ageGroup)
+}
+
+func (s *service) CountAgeGroup(data []CovidApiData) *CovidResponse {
 	ageGroup := CovidByAge{}
 	provMap := make(map[string]int)
 
@@ -51,7 +62,16 @@ func (s *service) CountAgeGroup() (*CovidResponse, error) {
 			ageGroup.Age61Plus++
 		}
 
-		provMap[d.ProvinceEn]++
+		if d.ProvinceEn == "" {
+			provMap["N/A"]++
+		} else {
+			provMap[d.ProvinceEn]++
+		}
+	}
+
+	var lenMap int
+	for _, v := range provMap {
+		lenMap += v
 	}
 
 	resp := CovidResponse{
@@ -59,15 +79,5 @@ func (s *service) CountAgeGroup() (*CovidResponse, error) {
 		Age:      ageGroup,
 	}
 
-	return &resp, nil
-}
-
-func (s *service) HandleRequest(ctx app.Context) {
-	ageGroup, err := s.CountAgeGroup()
-	if err != nil {
-		ctx.InternalServerError(err)
-		return
-	}
-
-	ctx.OK(ageGroup)
+	return &resp
 }
