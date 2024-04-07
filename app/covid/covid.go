@@ -2,17 +2,11 @@ package covid
 
 import (
 	"covid_cases/app"
-	"encoding/json"
 )
 
 type CovidResponse struct {
-	Provinces string     `json:"Provinces"`
-	Age       CovidByAge `json:"AgeGroups"`
-}
-
-type CovidByProvince struct {
-	Name  string `json:"name"`
-	Count int    `json:"count"`
+	Province map[string]int `json:"Provinces"`
+	Age      CovidByAge     `json:"AgeGroups"`
 }
 
 type CovidByAge struct {
@@ -37,19 +31,15 @@ func New(a apiAdapter) *service {
 }
 
 func (s *service) CountAgeGroup() (*CovidResponse, error) {
-	// 1. prepare data
 	data, err := s.GetData()
 	if err != nil {
 		return nil, err
 	}
 
 	ageGroup := CovidByAge{}
-
 	provMap := make(map[string]int)
 
-	//2. count data age groups
 	for _, d := range data {
-		//count age group
 		switch {
 		case d.Age == 0:
 			ageGroup.AgeUnknown++
@@ -61,22 +51,14 @@ func (s *service) CountAgeGroup() (*CovidResponse, error) {
 			ageGroup.Age61Plus++
 		}
 
-		//count province
 		provMap[d.ProvinceEn]++
 	}
 
-	provJsonResp, err := json.Marshal(provMap)
-	if err != nil {
-		return nil, err
-	}
-	provJsonString := string(provJsonResp)
-
 	resp := CovidResponse{
-		Provinces: provJsonString,
-		Age:       ageGroup,
+		Province: provMap,
+		Age:      ageGroup,
 	}
 
-	//3. response
 	return &resp, nil
 }
 
