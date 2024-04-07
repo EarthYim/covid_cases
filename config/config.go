@@ -5,16 +5,16 @@ import (
 )
 
 type Config struct {
-	Http             http   `mapstructure:"http"`
-	Server           server `mapstructure:"server"`
+	Http             Http   `mapstructure:"http"`
+	Server           Server `mapstructure:"server"`
 	CovidApiEndpoint string `mapstructure:"covid_api_endpoint"`
 }
 
-type http struct {
+type Http struct {
 	Timeout int `mapstructure:"timeout"`
 }
 
-type server struct {
+type Server struct {
 	Port string `mapstructure:"port"`
 }
 

@@ -77,10 +77,6 @@ func (m mockContext) OK(data interface{}) {
 	}
 }
 
-func (m mockContext) Bind(v interface{}) error {
-	return nil
-}
-
 func TestHandleCovid(t *testing.T) {
 
 	t.Run("Test HandleCovid with error", func(t *testing.T) {

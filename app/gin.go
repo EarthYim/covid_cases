@@ -1,7 +1,12 @@
 package app
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -9,30 +14,25 @@ import (
 )
 
 type Context interface {
-	Bind(v any) error
 	OK(v any)
 	InternalServerError(error)
 }
 
-type context struct {
+type appContext struct {
 	*gin.Context
 }
 
-func (c *context) Bind(v any) error {
-	return c.Context.ShouldBind(v)
-}
-
-func (c *context) OK(v any) {
+func (c *appContext) OK(v any) {
 	c.JSON(http.StatusOK, v)
 }
 
-func (c *context) InternalServerError(e error) {
+func (c *appContext) InternalServerError(e error) {
 	c.Error(e)
 }
 
 func NewHandler(handler func(Context)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handler(&context{c})
+		handler(&appContext{c})
 	}
 }
 
@@ -49,4 +49,27 @@ func NewRouter() *gin.Engine {
 
 	r.Use(cors.New(config))
 	return r
+}
+
+func Run(r *gin.Engine, port string) {
+	srv := http.Server{
+		Addr:    ":" + port,
+		Handler: r,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic(err)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		panic(err)
+	}
+	fmt.Println("shutting down")
 }

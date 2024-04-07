@@ -1,6 +1,7 @@
 package covid
 
 import (
+	"covid_cases/config"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -31,10 +32,10 @@ type Adapter struct {
 	endpoint string
 }
 
-func NewApiAdapter(endpoint string) *Adapter {
+func NewApiAdapter(endpoint string, config config.Http) *Adapter {
 	return &Adapter{
 		Client: http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(config.Timeout) * time.Second,
 		},
 		endpoint: endpoint,
 	}
