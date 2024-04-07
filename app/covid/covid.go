@@ -38,11 +38,6 @@ func (s *service) HandleRequest(ctx app.Context) {
 	}
 
 	ageGroup := s.CountAgeGroup(data)
-	if err != nil {
-		ctx.InternalServerError(err)
-		return
-	}
-
 	ctx.OK(ageGroup)
 }
 
@@ -67,11 +62,6 @@ func (s *service) CountAgeGroup(data []CovidApiData) *CovidResponse {
 		} else {
 			provMap[d.ProvinceEn]++
 		}
-	}
-
-	var lenMap int
-	for _, v := range provMap {
-		lenMap += v
 	}
 
 	resp := CovidResponse{
