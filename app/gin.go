@@ -11,7 +11,7 @@ import (
 type Context interface {
 	Bind(v any) error
 	OK(v any)
-	BadRequest(err error)
+	InternalServerError(error)
 }
 
 type context struct {
@@ -26,8 +26,8 @@ func (c *context) OK(v any) {
 	c.JSON(http.StatusOK, v)
 }
 
-func (c *context) BadRequest(err error) {
-	c.AbortWithError(http.StatusBadRequest, err)
+func (c *context) InternalServerError(e error) {
+	c.Error(e)
 }
 
 func NewHandler(handler func(Context)) gin.HandlerFunc {

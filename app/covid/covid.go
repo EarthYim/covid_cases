@@ -1,10 +1,13 @@
 package covid
 
-import "covid_cases/app"
+import (
+	"covid_cases/app"
+	"encoding/json"
+)
 
 type CovidResponse struct {
-	Provinces []CovidByProvince `json:"Provinces"`
-	Age       []CovidByAge      `json:"AgeGroups"`
+	Provinces string     `json:"Provinces"`
+	Age       CovidByAge `json:"AgeGroups"`
 }
 
 type CovidByProvince struct {
@@ -33,7 +36,7 @@ func New(a apiAdapter) *service {
 	}
 }
 
-func (s *service) CountAgeGroup() (*CovidByAge, error) {
+func (s *service) CountAgeGroup() (*CovidResponse, error) {
 	// 1. prepare data
 	data, err := s.GetData()
 	if err != nil {
@@ -42,8 +45,11 @@ func (s *service) CountAgeGroup() (*CovidByAge, error) {
 
 	ageGroup := CovidByAge{}
 
+	provMap := make(map[string]int)
+
 	//2. count data age groups
 	for _, d := range data {
+		//count age group
 		switch {
 		case d.Age == 0:
 			ageGroup.AgeUnknown++
@@ -54,16 +60,30 @@ func (s *service) CountAgeGroup() (*CovidByAge, error) {
 		case d.Age > 60:
 			ageGroup.Age61Plus++
 		}
+
+		//count province
+		provMap[d.ProvinceEn]++
+	}
+
+	provJsonResp, err := json.Marshal(provMap)
+	if err != nil {
+		return nil, err
+	}
+	provJsonString := string(provJsonResp)
+
+	resp := CovidResponse{
+		Provinces: provJsonString,
+		Age:       ageGroup,
 	}
 
 	//3. response
-	return &ageGroup, nil
+	return &resp, nil
 }
 
 func (s *service) HandleRequest(ctx app.Context) {
 	ageGroup, err := s.CountAgeGroup()
 	if err != nil {
-		ctx.BadRequest(err)
+		ctx.InternalServerError(err)
 		return
 	}
 
