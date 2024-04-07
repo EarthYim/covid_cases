@@ -13,7 +13,6 @@ func main() {
 	apiAdapter := covid.NewApiAdapter(config.CovidApiEndpoint, config.Http)
 	service := covid.New(apiAdapter)
 
-	r.GET("/covid", app.NewHandler(service.HandleRequest))
-	//TODO: gracefully shutdown
+	r.GET("/covid/summary", app.NewHandler(service.HandleRequest))
 	app.Run(r, config.Server.Port)
 }
