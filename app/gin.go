@@ -26,8 +26,8 @@ func (c *appContext) OK(v any) {
 	c.JSON(http.StatusOK, v)
 }
 
-func (c *appContext) InternalServerError(e error) {
-	c.Error(e)
+func (c *appContext) InternalServerError(err error) {
+	c.Error(err)
 }
 
 func NewHandler(handler func(Context)) gin.HandlerFunc {
@@ -66,10 +66,11 @@ func Run(r *gin.Engine, port string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan
+
 	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownRelease()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		panic(err)
+		fmt.Printf("failed to shutdown gracefully: %v\n", err)
 	}
 	fmt.Println("shutting down")
 }

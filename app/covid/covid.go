@@ -17,7 +17,7 @@ type CovidByAge struct {
 }
 
 type service struct {
-	apiAdapter
+	adapter apiAdapter
 }
 
 type apiAdapter interface {
@@ -26,22 +26,22 @@ type apiAdapter interface {
 
 func New(a apiAdapter) *service {
 	return &service{
-		apiAdapter: a,
+		adapter: a,
 	}
 }
 
 func (s *service) HandleRequest(ctx app.Context) {
-	data, err := s.GetData()
+	data, err := s.adapter.GetData()
 	if err != nil {
 		ctx.InternalServerError(err)
 		return
 	}
 
-	ageGroup := s.CountAgeGroup(data)
+	ageGroup := s.summarize(data)
 	ctx.OK(ageGroup)
 }
 
-func (s *service) CountAgeGroup(data []CovidApiData) *CovidResponse {
+func (s *service) summarize(data []CovidApiData) *CovidResponse {
 	ageGroup := CovidByAge{}
 	provMap := make(map[string]int)
 
@@ -68,6 +68,5 @@ func (s *service) CountAgeGroup(data []CovidApiData) *CovidResponse {
 		Province: provMap,
 		Age:      ageGroup,
 	}
-
 	return &resp
 }

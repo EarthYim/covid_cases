@@ -11,8 +11,8 @@ func main() {
 	r := app.NewRouter()
 
 	apiAdapter := covid.NewApiAdapter(config.CovidApiEndpoint, config.Http)
-	service := covid.New(apiAdapter)
+	covidService := covid.New(apiAdapter)
 
-	r.GET("/covid/summary", app.NewHandler(service.HandleRequest))
+	r.GET("/covid/summary", app.NewHandler(covidService.HandleRequest))
 	app.Run(r, config.Server.Port)
 }

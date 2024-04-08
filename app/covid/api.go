@@ -27,13 +27,13 @@ type CovidApiData struct {
 	StatQuarantine int    `json:"StatQuarantine"`
 }
 
-type Adapter struct {
+type adapter struct {
 	http.Client
 	endpoint string
 }
 
-func NewApiAdapter(endpoint string, config config.Http) *Adapter {
-	return &Adapter{
+func NewApiAdapter(endpoint string, config config.Http) *adapter {
+	return &adapter{
 		Client: http.Client{
 			Timeout: time.Duration(config.Timeout) * time.Second,
 		},
@@ -41,7 +41,7 @@ func NewApiAdapter(endpoint string, config config.Http) *Adapter {
 	}
 }
 
-func (a *Adapter) GetData() ([]CovidApiData, error) {
+func (a *adapter) GetData() ([]CovidApiData, error) {
 	req, err := http.NewRequest(http.MethodGet, a.endpoint, nil)
 	if err != nil {
 		return nil, err
